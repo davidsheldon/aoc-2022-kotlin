@@ -7,12 +7,6 @@ repositories {
 }
 
 tasks {
-    sourceSets {
-        main {
-            java.srcDirs("src")
-        }
-    }
-
     wrapper {
         gradleVersion = "7.5.1"
     }
