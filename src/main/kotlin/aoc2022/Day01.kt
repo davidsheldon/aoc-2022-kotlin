@@ -18,25 +18,6 @@ fun main() {
 
 10000""".split("\n")
 
-    fun <T> Sequence<T>.splitBy(predicate: (T) -> Boolean): Sequence<List<T>> {
-        val seq = this;
-        if (!seq.iterator().hasNext())
-            return emptySequence()
-        return sequence {
-            val current = mutableListOf<T>()
-            seq.forEach { element ->
-                val split = predicate(element)
-                if (split && current.isNotEmpty()) {
-                    yield(current)
-                    current.clear()
-                }
-                else {
-                    current.add(element)
-                }
-            }
-            if (current.isNotEmpty()) yield(current)
-        }
-    }
 
 
     fun elfCalories1(input: List<String>) =
