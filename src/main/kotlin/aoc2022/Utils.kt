@@ -59,10 +59,12 @@ fun <R> parseMatchOrThrow(line: String, pattern: Regex, onMatch: (MatchResult) -
     throw IllegalArgumentException(line)
 }
 
-fun Iterable<String>.parsedBy(pattern: Regex): Sequence<MatchResult> =
+fun Iterable<String>.parsedBy(pattern: Regex): Sequence<MatchResult> = parsedBy(pattern) { it }
+
+fun <R> Iterable<String>.parsedBy(pattern: Regex, onMatch: (MatchResult) -> R): Sequence<R> =
     asSequence().map { line ->
         pattern.matchEntire(line) ?: throw IllegalArgumentException(line)
-    }
+    }.map(onMatch)
 
 fun <A> applyN(dir: A, count: Int, func: (A) -> A): A =
     (1..count).fold(dir) { acc, i -> func(acc) }
