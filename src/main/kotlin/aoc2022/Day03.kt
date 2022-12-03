@@ -11,7 +11,7 @@ ttgJtRGJQctTZtZT
 CrZsJsPPZsGzwwsLwLmpwMDw""".split("\n")
 
 
-    fun inHalf(s: String) = Pair(s.substring(0, s.length / 2).toSet(), s.substring(s.length / 2).toSet())
+    fun inHalf(s: String) = (s.length / 2).let { split -> s.substring(0, split) to s.substring(split) }
 
     fun Char.score() = when (this) {
         in 'a'..'z' -> 1 + (this - 'a')
@@ -20,20 +20,14 @@ CrZsJsPPZsGzwwsLwLmpwMDw""".split("\n")
 
     }
 
-    fun part1(input: List<String>): Int {
-        return input.map { inHalf(it) }.sumOf {
-            it.first.intersect(it.second).first().score()
-        }
+    fun <T> Iterable<Set<T>>.intersectAll() = reduce {a, b -> a.intersect(b) }
+    fun Iterable<String>.scoreSingleCommonCharacter() = map(String::toSet).intersectAll().first().score()
+
+    fun part1(input: List<String>): Int = input.sumOf {
+        inHalf(it).toList().scoreSingleCommonCharacter()
     }
 
-    fun part2(input: List<String>): Int {
-        return input.windowed(3,3).sumOf {
-            it.map(String::toSet)
-                .reduce { a, b -> a.intersect(b)}
-                .first()
-                .score()
-        }
-    }
+    fun part2(input: List<String>) = input.chunked(3).sumOf(List<String>::scoreSingleCommonCharacter)
 
 
     // test if implementation meets criteria from the description, like:
