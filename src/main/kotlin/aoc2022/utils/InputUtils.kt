@@ -64,7 +64,9 @@ object InputUtils {
             val url = "https://adventofcode.com/$year/day/$day/input"
             val cookies = secrets.filterKeys { it == "session" }
             DownloadUtils.downloadFile(url, cookies).use { input ->
-                resourcePath.toFile().outputStream().use { output ->
+                val file = resourcePath.toFile()
+                file.parentFile.mkdirs()
+                file.outputStream().use { output ->
                     val bytes = input.transferTo(output)
                     println("Downloaded $bytes bytes to ${resourcePath.toAbsolutePath()}")
                 }
