@@ -1,16 +1,15 @@
 package aoc2021
 
 
-import aoc2022.blocksOfLines
 import aoc2022.parsedBy
 import aoc2022.utils.InputUtils
-import java.lang.Math.abs
+import kotlin.math.sign
 
 data class Coord(val x: Int, val y: Int) {
     // Unit in the direction of the other one
     fun directionTo(other: Coord): Coord = Coord(other.x - x, other.y - y).normalise()
 
-    fun normalise() = Coord(x = x / length(), y = y / length() )
+    fun normalise() = Coord(x = x.sign, y = y.sign)
     fun length() = kotlin.math.abs(x) + kotlin.math.abs(y)
     operator fun plus(other: Coord) = Coord(x = x + other.x, y = y+other.y)
 }
@@ -21,10 +20,9 @@ data class Line(val start: Coord, val end: Coord) {
             if (start != end) {
                 var current = start;
                 val direction = start.directionTo(end)
-                println(direction)
                 do {
-                    yield(current)
                     current += direction
+                    yield(current)
                 } while (current != end)
             }
         }
@@ -60,13 +58,16 @@ fun main() {
             .flatMap {
                 it.allPoints()
             }.groupingBy { it }.eachCount()
-        println(counts)
         return counts.filter { (_, count) -> count > 1 }.count()
     }
 
 
     fun part2(input: List<String>): Int {
-        return 1
+        val counts = parse(input)
+            .flatMap {
+                it.allPoints()
+            }.groupingBy { it }.eachCount()
+        return counts.filter { (_, count) -> count > 1 }.count()
     }
 
     // test if implementation meets criteria from the description, like:
