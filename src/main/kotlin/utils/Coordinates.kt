@@ -13,4 +13,20 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
     operator fun minus(other: Coordinates) = Coordinates(x - other.x, y - other.y)
     operator fun plus(other: Coordinates) = Coordinates(x + other.x, y + other.y)
     fun sign() = Coordinates(x.sign, y.sign)
+
+    fun move(d: Direction, distance: Int = 1): Coordinates =
+        when(d) {
+            N -> dY(-distance)
+            S -> dY(distance)
+            E -> dX(distance)
+            W -> dX(-distance)
+        }
 }
+
+sealed class Direction {
+}
+
+object N: Direction()
+object S: Direction()
+object E: Direction()
+object W: Direction()
