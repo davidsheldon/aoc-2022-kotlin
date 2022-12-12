@@ -69,7 +69,7 @@ move 2 from 2 to 1
 move 1 from 1 to 2""".split("\n")
 
     fun parse(input: List<String>): Pair<Day05.Stacks, Sequence<Day05.Command>> {
-        val (rawState, rawCommands) = blocksOfLines(input.asSequence()).toList()
+        val (rawState, rawCommands) = blocksOfLines(input).toList()
         val state = parseToStack(rawState)
         val commands = rawCommands.parsedBy("move (\\d+) from (\\d+) to (\\d+)".toRegex()) {
             val (count, from, to) = it.destructured

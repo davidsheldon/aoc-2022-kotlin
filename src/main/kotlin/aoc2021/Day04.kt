@@ -82,7 +82,7 @@ fun main() {
 
     fun parse(input: List<String>): Day04 {
         val calls = input[0].split(",").map { it.toInt() }
-        val boards = blocksOfLines(input.drop(2).asSequence())
+        val boards = blocksOfLines(input.drop(2))
             .map(::parseBoard).toList()
         return Day04(calls, boards)
     }

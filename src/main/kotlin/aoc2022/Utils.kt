@@ -35,18 +35,18 @@ fun <T> Sequence<T>.splitBy(predicate: (T) -> Boolean): Sequence<List<T>> {
     }
 }
 
-fun blocksByBlankLines(lineSeq: Sequence<String>): Sequence<IndexedValue<String>> = sequence {
-        var blockId = 0
-        lineSeq.forEach { line ->
-            if (line.isBlank()) {
-                blockId++
-            } else {
-                yield(IndexedValue(blockId, line))
-            }
+fun blocksByBlankLines(lineSeq: Iterable<String>): Sequence<IndexedValue<String>> = sequence {
+    var blockId = 0
+    lineSeq.forEach { line ->
+        if (line.isBlank()) {
+            blockId++
+        } else {
+            yield(IndexedValue(blockId, line))
         }
     }
+}
 
-fun blocksOfLines(lineSeq: Sequence<String>): Collection<List<String>> =
+fun blocksOfLines(lineSeq: Iterable<String>): Collection<List<String>> =
     blocksByBlankLines(lineSeq)
         .groupBy({ it.index }, { it.value })
         .values
@@ -58,6 +58,8 @@ fun <R> parseMatchOrThrow(line: String, pattern: Regex, onMatch: (MatchResult) -
     }
     throw IllegalArgumentException(line)
 }
+
+fun listOfNumbers(list: String): List<Int> = list.trim().split(',').map { it.trim().toInt() }
 
 fun Iterable<String>.parsedBy(pattern: Regex): Sequence<MatchResult> = parsedBy(pattern) { it }
 
