@@ -10,7 +10,6 @@ data class Coord(val x: Int, val y: Int) {
     fun directionTo(other: Coord): Coord = Coord(other.x - x, other.y - y).normalise()
 
     fun normalise() = Coord(x = x.sign, y = y.sign)
-    fun length() = kotlin.math.abs(x) + kotlin.math.abs(y)
     operator fun plus(other: Coord) = Coord(x = x + other.x, y = y+other.y)
 }
 data class Line(val start: Coord, val end: Coord) {

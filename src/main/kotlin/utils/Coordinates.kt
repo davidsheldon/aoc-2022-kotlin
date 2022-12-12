@@ -21,6 +21,13 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
             E -> dX(distance)
             W -> dX(-distance)
         }
+
+    fun adjacent() = sequence {
+            yield(dX(1))
+            yield(dX(-1))
+            yield(dY(1))
+            yield(dY(-1))
+        }
 }
 
 sealed class Direction {
