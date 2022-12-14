@@ -91,3 +91,6 @@ fun <T> Sequence<T>.takeWhilePlusOne(predicate: (T) -> Boolean): Sequence<T> {
     }
 }
 
+
+ fun Sequence<Int>.product() = reduce(Int::times)
+

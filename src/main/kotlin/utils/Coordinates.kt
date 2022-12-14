@@ -1,6 +1,5 @@
 package utils
 
-import aoc2021.Coord
 import aoc2022.listOfNumbers
 import aoc2022.takeWhilePlusOne
 import java.lang.Integer.max
@@ -58,6 +57,10 @@ fun List<Coordinates>.boundingBox() : Pair<Coordinates, Coordinates> {
         Coordinates(min(tl.x, coord.x), min(tl.y, coord.y)) to
                 Coordinates(max(br.x, coord.x), max(br.y, coord.y))
     }
+}
+
+data class Bounds(val tl: Coordinates, val br: Coordinates) {
+    fun contains(c:Coordinates) = c.x >= tl.x && c.x <= br.x && c.y >= tl.y && c.y <= br.y
 }
 
 sealed class Direction {

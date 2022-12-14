@@ -13,24 +13,28 @@ class Cave(initialState: Map<Coordinates, Char>) {
     val maxY = state.keys.maxOf { it.y }
     override fun toString(): String {
         val (tl, br) = state.keys.toList().boundingBox()
-        return (tl.y..br.y).map { y ->
+        return (tl.y..br.y)
+            .joinToString("\n") { y ->
             (tl.x..br.x).map { x ->
-                state[Coordinates(x,y)] ?: '.'
+                state[Coordinates(x, y)] ?: '.'
             }.joinToString("")
-        }.joinToString("\n")
+        }
     }
 
+    private val newPositions = listOf(Coordinates(0, 1), Coordinates(-1, 1), Coordinates(1,1))
+
+    private fun fallFrom(start: Coordinates) = generateSequence(start) { last ->
+        newPositions.map { last + it }.firstOrNull { it !in state }
+    }.takeWhile { it.y < maxY + 2 }.last()
+
     fun dropSand(coordinates: Coordinates): Boolean {
-        if (coordinates.y > maxY) return false
-        val nextMove = listOf(coordinates.dY(1), coordinates.dY(1).dX(-1), coordinates.dY(1).dX(1))
-            .firstOrNull { it !in state }
-        if (nextMove == null) {
-            state[coordinates] = 'o'
-            return true
-        }
-        else {
-            return dropSand(nextMove)
-        }
+        val end = fallFrom(coordinates)
+        if (end.y <= maxY) { state[end] = 'o'; return true;}
+        return false
+    }
+
+    fun dropSand2(coordinates: Coordinates) {
+        state[fallFrom(coordinates)] = 'o'
     }
 }
 
@@ -40,21 +44,21 @@ fun main() {
 503,4 -> 502,4 -> 502,9 -> 494,9""".split("\n")
 
 
+    fun getCave(input: List<String>) = input.map { line ->
+        line.splitToSequence(" -> ")
+            .map(String::toCoordinates)
+            .zipWithNext { a, b ->
+                a.lineTo(b)
+            }.flatten()
+    }.flatMap { it }.associateWith { '#' }
+        .let { Cave(it) }
 
-
-
+    val startPosition = Coordinates(500, 0)
     fun part1(input: List<String>): Int {
-        val cave = input.map { line ->
-            line.splitToSequence(" -> ")
-                .map(String::toCoordinates)
-                .zipWithNext { a, b ->
-                    a.lineTo(b)
-                }.flatten()
-        }.flatMap { it }.associateWith { '#' }
-            .let { Cave(it) }
+        val cave = getCave(input)
 
         var count = 0
-        while(cave.dropSand(Coordinates(500, 0))) {
+        while(cave.dropSand(startPosition)) {
 count++;
         }
 
@@ -65,7 +69,18 @@ count++;
 
 
     fun part2(input: List<String>): Int {
-        return input.size
+        val cave = getCave(input)
+
+        var count = 0
+        do {
+            cave.dropSand2(startPosition)
+            count++;
+
+        } while (startPosition !in cave.state)
+
+        println(cave)
+
+        return count
     }
 
     // test if implementation meets criteria from the description, like:
