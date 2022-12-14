@@ -79,3 +79,15 @@ fun <T: Comparable<T>> Iterable<T>.topN(n: Int) = this.fold(ArrayList<T>()) { ac
     }
     acc
 }
+
+fun <T> Sequence<T>.takeWhilePlusOne(predicate: (T) -> Boolean): Sequence<T> {
+    var lastSeen: T? = null
+    return takeWhile {
+        val shouldTake = predicate(it)
+        if (!shouldTake) lastSeen = it
+        shouldTake
+    } + sequence {
+        if (lastSeen != null) yield(lastSeen!!)
+    }
+}
+

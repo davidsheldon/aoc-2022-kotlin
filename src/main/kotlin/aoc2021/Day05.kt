@@ -2,6 +2,7 @@ package aoc2021
 
 
 import aoc2022.parsedBy
+import aoc2022.takeWhilePlusOne
 import aoc2022.utils.InputUtils
 import kotlin.math.sign
 
@@ -14,17 +15,10 @@ data class Coord(val x: Int, val y: Int) {
 }
 data class Line(val start: Coord, val end: Coord) {
     fun allPoints(): Sequence<Coord> {
-        return sequence {
-            yield(start)
-            if (start != end) {
-                var current = start;
-                val direction = start.directionTo(end)
-                do {
-                    current += direction
-                    yield(current)
-                } while (current != end)
-            }
-        }
+        val direction = start.directionTo(end)
+        return generateSequence(start) {
+            it + direction
+        }.takeWhilePlusOne { it != end }
     }
     fun isHorizOrVertical() =  start.x == end.x || start.y == end.y
 }
