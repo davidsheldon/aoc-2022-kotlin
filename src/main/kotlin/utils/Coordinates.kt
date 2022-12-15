@@ -42,6 +42,8 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
             it + direction
         }.takeWhilePlusOne { it != end }
     }
+
+    fun length(): Int = x.absoluteValue + y.absoluteValue
 }
 
 fun String.toCoordinates(): Coordinates {
@@ -60,7 +62,7 @@ fun List<Coordinates>.boundingBox() : Pair<Coordinates, Coordinates> {
 }
 
 data class Bounds(val tl: Coordinates, val br: Coordinates) {
-    fun contains(c:Coordinates) = c.x >= tl.x && c.x <= br.x && c.y >= tl.y && c.y <= br.y
+    operator fun contains(c:Coordinates) = c.x >= tl.x && c.x <= br.x && c.y >= tl.y && c.y <= br.y
 }
 
 sealed class Direction {
