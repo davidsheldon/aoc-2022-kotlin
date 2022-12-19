@@ -93,6 +93,7 @@ fun <T> Sequence<T>.takeWhilePlusOne(predicate: (T) -> Boolean): Sequence<T> {
 
 
  fun Sequence<Int>.product() = reduce(Int::times)
+ fun List<Int>.product() = reduce(Int::times)
 
 fun <T> Sequence<Set<T>>.intersectAll() = reduce(Set<T>::intersect)
 fun <T> Sequence<Set<T>>.unionAll() = reduce(Set<T>::union)
