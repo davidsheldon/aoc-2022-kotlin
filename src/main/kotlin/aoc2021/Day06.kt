@@ -2,7 +2,7 @@ package aoc2021
 
 
 import aoc2022.applyN
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 
 // 8 + 6 + 6 + 6 + 6
 

@@ -1,6 +1,6 @@
 package aoc2022
 
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 import java.lang.NumberFormatException
 import java.util.concurrent.ConcurrentHashMap
 

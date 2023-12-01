@@ -3,7 +3,7 @@ package aoc2021
 
 import aoc2022.parsedBy
 import aoc2022.takeWhilePlusOne
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 import kotlin.math.sign
 
 data class Coord(val x: Int, val y: Int) {

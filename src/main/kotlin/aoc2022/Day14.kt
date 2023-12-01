@@ -1,6 +1,6 @@
 package aoc2022
 
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.IntNode

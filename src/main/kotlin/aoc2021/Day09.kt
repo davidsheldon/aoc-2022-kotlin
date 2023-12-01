@@ -2,7 +2,7 @@ package aoc2021
 
 
 import aoc2022.product
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 import utils.Bounds
 import utils.Coordinates
 

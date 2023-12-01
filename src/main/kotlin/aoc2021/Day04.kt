@@ -2,7 +2,7 @@ package aoc2021
 
 
 import aoc2022.blocksOfLines
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 
 class Day04(val calls: List<Int>, private val boards: List<Board>) {
 

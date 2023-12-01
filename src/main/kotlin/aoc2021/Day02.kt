@@ -1,7 +1,7 @@
 package aoc2021
 
 import aoc2022.parsedBy
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 import utils.Coordinates
 
 private sealed class Command {

@@ -1,6 +1,6 @@
 package aoc2021
 
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 
 
 fun main() {

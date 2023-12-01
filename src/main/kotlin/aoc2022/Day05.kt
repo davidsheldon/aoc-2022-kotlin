@@ -1,6 +1,6 @@
 package aoc2022
 
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 
 object Day05 {
     data class Command(val n: Int, val from: Int, val to: Int)

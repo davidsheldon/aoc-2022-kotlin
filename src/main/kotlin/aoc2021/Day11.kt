@@ -1,7 +1,7 @@
 package aoc2021
 
 
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 
 typealias Int2d = Array<IntArray>
 fun Int2d.copy() = map { it.clone() }.toTypedArray()

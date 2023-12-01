@@ -1,6 +1,6 @@
 package aoc2022
 
-import aoc2022.utils.InputUtils
+import utils.InputUtils
 
 enum class Action(val score : Int) { ROCK(1), PAPER(2), SCISSORS(3) }
 
