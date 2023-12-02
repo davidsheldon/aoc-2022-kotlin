@@ -1,8 +1,8 @@
 package aoc2022
 
-import aoc2022.utils.InputUtils
 import aoc2022.utils.bfs
 import utils.Cube
+import utils.InputUtils
 import utils.toPoint3d
 
 

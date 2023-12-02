@@ -1,8 +1,19 @@
 package aoc2022
 
 import utils.InputUtils
-import java.lang.NumberFormatException
 import java.util.concurrent.ConcurrentHashMap
+
+sealed class Expression {
+    data class Add(val a:Long, val b: Long) {
+        override fun toString(): String = "$a+$b"
+    }
+    data class Sub(val a:Long, val b: Long) {
+        override fun toString(): String = "$a-$b"
+    }
+    data class Mul(val a:Long, val b: Long)
+    data class Div(val a:Long, val b: Long)
+    data class Constant(val v: Long)
+}
 
 private val parser = "(\\w+) ([-+*/]) (\\w+)".toRegex()
 class Monkey20(val formula: String) {

@@ -1,7 +1,7 @@
 package aoc2022
 
-import aoc2022.utils.InputUtils
 import utils.Coordinates
+import utils.InputUtils
 import java.lang.Integer.max
 
 typealias Rock = List<String>
@@ -102,7 +102,6 @@ fun main() {
             "##",
         )
     )
-    fun <T> Sequence<T>.repeatForever() = generateSequence(this) { it }.flatten()
 
     fun supplyRocks(jetString: String, count: Int): Room {
         val rockSupply = rocks.asSequence().repeatForever().iterator()
