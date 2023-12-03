@@ -35,6 +35,13 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
             yield(dY(1))
             yield(dY(-1))
         }
+    fun adjacentIncludeDiagonal() = sequence {
+            yieldAll(adjacent())
+            yield(dX(-1).dY(1))
+            yield(dX(-1).dY(-1))
+            yield(dX(1).dY(1))
+            yield(dX(1).dY(-1))
+        }
 
     fun lineTo(end: Coordinates): Sequence<Coordinates> {
         val direction = this.directionTo(end)
@@ -44,6 +51,9 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
     }
 
     fun length(): Int = x.absoluteValue + y.absoluteValue
+    fun heading(d: Direction): Sequence<Coordinates> =
+        generateSequence(this) { it.move(d) }
+
 }
 
 fun String.toCoordinates(): Coordinates {
@@ -121,4 +131,21 @@ data class Cube(val min: Point3d, val max: Point3d) {
                 p.y in min.y..max.y &&
                 p.z in min.z..max.z
     }
+}
+
+open class ArrayAsSurface(val points: List<String>) {
+    private val bounds = Bounds(Coordinates(0,0), Coordinates(points[0].length - 1, points.size-1))
+    fun allPoints(): Sequence<Coordinates> =
+        points.indices.asSequence().flatMap { y -> points[0].indices.asSequence().map { x -> Coordinates(x,y)} }
+
+    fun indexed(): Sequence<Pair<Coordinates, Char>> =
+        points.asSequence().flatMapIndexed { y, row ->
+            row.asSequence().mapIndexed { x: Int, c: Char ->  Coordinates(x,y) to c}
+        }
+
+    fun inBounds(c: Coordinates) = bounds.contains(c)
+    fun at(c: Coordinates): Char = points[c.y][c.x]
+    fun checkedAt(c: Coordinates, default: Char = ' ') = if(inBounds(c)) { at(c) } else { default }
+
+
 }

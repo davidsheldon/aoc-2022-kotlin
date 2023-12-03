@@ -2,17 +2,11 @@ package aoc2021
 
 
 import aoc2022.product
-import utils.InputUtils
-import utils.Bounds
+import utils.ArrayAsSurface
 import utils.Coordinates
+import utils.InputUtils
 
-class Surface(val points: List<String>) {
-    private val bounds = Bounds(Coordinates(0,0), Coordinates(points[0].length - 1, points.size-1))
-   fun allPoints(): Sequence<Coordinates> =
-       points.indices.asSequence().flatMap { y -> points[0].indices.map { x -> Coordinates(x,y)} }
-
-    fun inBounds(c: Coordinates) = bounds.contains(c)
-    fun at(c: Coordinates): Char = points[c.y][c.x]
+class Surface(val input: List<String>): ArrayAsSurface(input) {
     fun basinAt(start: Coordinates): Sequence<Coordinates> {
         val queue = ArrayDeque<Coordinates>()
         queue.add(start)

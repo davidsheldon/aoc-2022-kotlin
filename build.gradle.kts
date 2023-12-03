@@ -15,6 +15,15 @@ tasks {
         gradleVersion = "7.5.1"
     }
 }
+tasks
+    .withType<org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile>()
+    .configureEach {
+        compilerOptions
+            .languageVersion
+            .set(
+                org.jetbrains.kotlin.gradle.dsl.KotlinVersion.KOTLIN_2_0
+            )
+    }
 
 dependencies {
     // Other dependencies.
