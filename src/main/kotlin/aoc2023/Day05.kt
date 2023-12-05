@@ -1,7 +1,12 @@
 package aoc2023
-
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import utils.InputUtils
 
+val PARALLEL = true
 data class SeedRange(val destStart: Long, val sourceStart: Long, val size: Int) {
     fun contains(x: Long) = (x >= sourceStart) && (x < (sourceStart + size))
     fun endInclusive() = sourceStart + size - 1
@@ -86,19 +91,28 @@ humidity-to-location map:
         val problem = input.parseDay5()
         return problem.seeds.minOf { problem.mapSeed(it) }
     }
-
+    suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
+        map { async { f(it) } }.awaitAll()
+    }
 
     fun part2(input: List<String>): Long {
         val problem = input.parseDay5()
         val seedRanges = problem.seeds.chunked(2).map { it[0]..<(it[0] + it[1]) }
         val totalSize = problem.seeds.chunked(2).sumOf { it[1] }
         println("Total size: $totalSize")
-        var complete = 0L
-        return seedRanges.asSequence()
-            .onEach { complete += (1 + it.last - it.first) }
-            .map { range -> range.minOf { problem.mapSeed(it) } }
-            .onEach { println("Min: $it, $complete/$totalSize") }
-            .min()
+        return if (PARALLEL) {
+            runBlocking(Dispatchers.IO) {
+                seedRanges.pmap { range -> range.minOf { problem.mapSeed(it) } }
+                    .min()
+            }
+        } else {
+            var complete = 0L
+            seedRanges
+                .onEach { complete += (1 + it.last - it.first) }
+                .map { range -> range.minOf { problem.mapSeed(it) } }
+                .onEach { println("Min: $it, $complete/$totalSize") }
+                .min()
+        }
     }
 
     // test if implementation meets criteria from the description, like:
@@ -112,5 +126,8 @@ humidity-to-location map:
     val input = puzzleInput.toList()
 
     println(part1(input))
+
+    val start = System.currentTimeMillis()
     println(part2(input))
+    println(System.currentTimeMillis() - start)
 }
