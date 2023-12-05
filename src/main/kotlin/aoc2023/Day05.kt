@@ -94,6 +94,14 @@ humidity-to-location map:
     suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
         map { async { f(it) } }.awaitAll()
     }
+    fun LongRange.chunked(size: Long) = sequence {
+        var current = first
+        while(current <= last) {
+            val end = kotlin.math.min(current + size, last + 1)
+            yield(current ..< end)
+            current = end
+        }
+    }
 
     fun part2(input: List<String>): Long {
         val problem = input.parseDay5()
@@ -101,10 +109,15 @@ humidity-to-location map:
         val totalSize = problem.seeds.chunked(2).sumOf { it[1] }
         println("Total size: $totalSize")
         return if (PARALLEL) {
-            runBlocking(Dispatchers.IO) {
-                seedRanges.pmap { range -> range.minOf { problem.mapSeed(it) } }
+                seedRanges.asSequence().map { range ->
+                    runBlocking(Dispatchers.IO) {
+                    val min = range.chunked(5_000_000).toList()
+                        .pmap { subRange -> subRange.minOf { problem.mapSeed(it) }}
+                        .min()
+                    println("Min: $min")
+                    min
+                }}
                     .min()
-            }
         } else {
             var complete = 0L
             seedRanges
