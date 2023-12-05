@@ -51,6 +51,8 @@ fun blocksOfLines(lineSeq: Iterable<String>): Collection<List<String>> =
         .groupBy({ it.index }, { it.value })
         .values
 
+fun Iterable<String>.toBlocksOfLines() = blocksOfLines(this)
+
 fun <R> parseMatchOrThrow(line: String, pattern: Regex, onMatch: (MatchResult) -> R): R {
     val match = pattern.matchEntire(line)
     if (match != null) {
