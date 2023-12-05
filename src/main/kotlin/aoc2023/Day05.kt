@@ -1,17 +1,20 @@
 package aoc2023
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import utils.InputUtils
+import kotlin.math.max
+import kotlin.math.min
 
-val PARALLEL = true
+enum class Mode {
+    PARALLEL, BRUTE, SPLIT
+}
+
+val mode = Mode.SPLIT
 data class SeedRange(val destStart: Long, val sourceStart: Long, val size: Int) {
     fun contains(x: Long) = (x >= sourceStart) && (x < (sourceStart + size))
     fun endInclusive() = sourceStart + size - 1
     fun endExclusive() = sourceStart + size
-    fun apply(x: Long) = if (contains(x)) { x - sourceStart + destStart } else { x }
+    fun apply(x: Long) = if (contains(x)) { x + offset() } else { x }
+    fun offset() = destStart - sourceStart
     fun applyAndSplit(range: LongRange): List<LongRange> = if (intersect(range)) {
         if (range.contains(sourceStart) && range.contains(endInclusive())) {
             listOf(destStart..< (destStart + size))
@@ -19,15 +22,39 @@ data class SeedRange(val destStart: Long, val sourceStart: Long, val size: Int) 
     } else { emptyList() }
     fun intersect(range: LongRange): Boolean = (sourceStart <= range.last) xor (endInclusive() <= range.first)
 }
+
 data class SeedMap(val from: String, val to: String, val ranges: List<SeedRange>) {
-    fun apply(x: Long) = ranges.firstOrNull { it.contains(x) }?.apply(x) ?: x
-    fun apply(range: LongRange): List<LongRange> = ranges.flatMap { it.applyAndSplit(range)}
+    val sortedRanges = ranges.sortedBy { it.sourceStart }
+
+
+    fun apply(x: Long) = rangeFor(x)?.apply(x) ?: x
+
+    private fun rangeFor(x: Long) = ranges.firstOrNull { it.contains(x) }
+
+
+
+    fun apply(range: LongRange): Sequence<LongRange> = sequence {
+        var current = range.first
+        val splits = sortedRanges.filter { it.intersect(range) }
+        splits.forEach { split ->
+            if (split.sourceStart > current) { yield(current..<split.sourceStart) }
+            val start = max(split.sourceStart, current)
+            val end = min(split.endInclusive(), range.endInclusive)
+            val offset = split.offset()
+            yield((start+offset)..(end+offset))
+            current = end
+        }
+        if (current < range.endInclusive) {
+            yield(current..range.endInclusive)
+        }
+
+    }
 }
 data class Day5(val seeds: List<Long>, val maps: List<SeedMap>) {
     fun mapSeed(seed: Long) = maps.fold(seed) { acc, map -> map.apply(acc)}
-    fun minOfRange(range: LongRange) = maps.fold(listOf(range)) { acc, map -> acc
+    fun minOfRange(range: LongRange) = maps.fold(listOf(range)) { acc, map -> acc.flatMap { map.apply(it) }}
+        .minOf { it.start }
 
-    }
 }
 fun String.listOfLongs(): List<Long> = trim().split("\\D+".toRegex()).map { it.trim().toLong() }
 
@@ -108,7 +135,8 @@ humidity-to-location map:
         val seedRanges = problem.seeds.chunked(2).map { it[0]..<(it[0] + it[1]) }
         val totalSize = problem.seeds.chunked(2).sumOf { it[1] }
         println("Total size: $totalSize")
-        return if (PARALLEL) {
+        return when(mode) {
+            Mode.PARALLEL ->
                 seedRanges.asSequence().map { range ->
                     runBlocking(Dispatchers.IO) {
                     val min = range.chunked(5_000_000).toList()
@@ -118,7 +146,7 @@ humidity-to-location map:
                     min
                 }}
                     .min()
-        } else {
+            Mode.BRUTE -> {
             var complete = 0L
             seedRanges
                 .onEach { complete += (1 + it.last - it.first) }
@@ -126,6 +154,9 @@ humidity-to-location map:
                 .onEach { println("Min: $it, $complete/$totalSize") }
                 .min()
         }
+            Mode.SPLIT -> {
+                seedRanges.minOf { range -> problem.minOfRange(range) }
+            }            }
     }
 
     // test if implementation meets criteria from the description, like:
