@@ -11,12 +11,46 @@ fun parseDirection(c: Char) = when(c) {
     else -> throw IllegalArgumentException("Wrong char $c")
 }
 
+data class Position(val index: Int, val loc: String)
+
 class Day08(val instructions: List<Direction>, val maps: Map<String, Pair<String, String>>) {
     fun move(current: String, dir: Direction): String =
         when(dir) {
             Direction.LEFT -> maps[current]!!.first
             Direction.RIGHT -> maps[current]!!.second
         }
+
+    fun loopSize(start: String): Int {
+        return loopFrom(start).count()
+
+    }
+
+    private fun loopFrom(start: String): Sequence<Position> {
+        val seen = mutableSetOf<Position>()
+        val positions = positionsFrom(start)
+        val loop = positions.takeWhile { seen.add(it) }
+        return loop
+    }
+
+    fun locationsLoop(start: String) = loopFrom(start).map { it.loc }
+
+    private fun positionsFrom(start: String): Sequence<Position> {
+        val positions = sequence {
+            var current = start
+            do {
+                instructions.forEachIndexed { i, dir ->
+                    val pos = Position(i, current)
+                    yield(pos)
+                    current = move(current, dir)
+                }
+            } while (true)
+        }
+        return positions
+    }
+
+    fun locationsFrom(start: String): Sequence<String> {
+        return positionsFrom(start).map { it.loc }
+    }
 
 
 }
@@ -41,27 +75,28 @@ ZZZ = (ZZZ, ZZZ)""".trimIndent().split("\n")
     fun part1(input: List<String>): Int {
         val problem = parseDay08(input)
 
-        val locations = sequence<String> {
-            var current = "AAA"
-            yield(current)
-            problem.instructions.asSequence().repeatForever().forEach { dir ->
-                current = problem.move(current, dir)
-                yield(current)
-            }
-        }
-        return locations
+        return problem.locationsFrom("AAA")
             //.onEach { println(it) }
             .takeWhile { it != "ZZZ" }.count()
 
     }
 
 
-    fun part2(input: List<String>): Int {
+    fun part2(input: List<String>): Long {
         val problem = parseDay08(input)
 
         val initial = problem.maps.keys.filter { it.endsWith("A") }
-        println(initial)
-        return problem.instructions.size
+
+        return initial.map { start ->
+            val loop = problem.locationsLoop(start).toList()
+            val ends = loop.count { it.endsWith("Z") }
+            val index = loop.indexOfFirst { it.endsWith("Z") }
+            println("$start has loop size ${loop.size}")
+            println("    loop has $ends ends and index $index")
+            index.toLong()
+        }.lcm()
+
+
     }
 
     // test if implementation meets criteria from the description, like:

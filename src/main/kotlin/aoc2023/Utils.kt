@@ -103,3 +103,15 @@ fun <T> Sequence<Set<T>>.intersectAll() = reduce(Set<T>::intersect)
 fun <T> Sequence<Set<T>>.unionAll() = reduce(Set<T>::union)
 
 fun <T> Sequence<T>.repeatForever() = generateSequence(this) { it }.flatten()
+
+fun gcd(a: Long, b: Long): Long {
+    var x = a
+    var y = b
+    while (x != y) {
+        if (x>y) { x -= y } else { y -= x }
+    }
+    return x
+}
+fun lcm(a: Long, b: Long): Long = a * (b / gcd(a, b))
+
+fun Iterable<Long>.lcm(): Long = reduce { a, b -> lcm(a,b)}
