@@ -19,7 +19,13 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
     fun sign() = Coordinates(x.sign, y.sign)
 
     fun directionTo(other: Coordinates) = Coordinates(other.x - x, other.y - y).sign()
-
+    fun compassTo(other: Coordinates) = when(directionTo(other)) {
+        Coordinates(0,-1) -> N
+        Coordinates(0, 1) -> S
+        Coordinates( 1,0) -> E
+        Coordinates(-1,0) -> W
+        else -> null
+    }
 
     fun move(d: Direction, distance: Int = 1): Coordinates =
         when(d) {
@@ -78,10 +84,10 @@ data class Bounds(val tl: Coordinates, val br: Coordinates) {
 sealed class Direction {
 }
 
-object N: Direction()
-object S: Direction()
-object E: Direction()
-object W: Direction()
+data object N: Direction()
+data object S: Direction()
+data object E: Direction()
+data object W: Direction()
 
 
 data class Point3d(val x: Int, val y: Int, val z: Int) {
@@ -136,7 +142,10 @@ data class Cube(val min: Point3d, val max: Point3d) {
 open class ArrayAsSurface(val points: List<String>) {
     private val bounds = Bounds(Coordinates(0,0), Coordinates(points[0].length - 1, points.size-1))
     fun allPoints(): Sequence<Coordinates> =
-        points.indices.asSequence().flatMap { y -> points[0].indices.asSequence().map { x -> Coordinates(x,y)} }
+        points.indices.asSequence().flatMap { y -> row(y) }
+
+    fun row(y: Int) = points[0].indices.asSequence().map { x -> Coordinates(x,y)}
+    fun rows() = points.indices.asSequence().map { y -> row(y) }
 
     fun indexed(): Sequence<Pair<Coordinates, Char>> =
         points.asSequence().flatMapIndexed { y, row ->
@@ -144,7 +153,7 @@ open class ArrayAsSurface(val points: List<String>) {
         }
 
     fun inBounds(c: Coordinates) = bounds.contains(c)
-    fun at(c: Coordinates): Char = points[c.y][c.x]
+    open fun at(c: Coordinates): Char = points[c.y][c.x]
     fun checkedAt(c: Coordinates, default: Char = ' ') = if(inBounds(c)) { at(c) } else { default }
 
 
