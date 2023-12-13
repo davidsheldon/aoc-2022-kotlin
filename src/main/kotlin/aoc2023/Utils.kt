@@ -1,5 +1,8 @@
 package aoc2023
 
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -115,3 +118,7 @@ fun gcd(a: Long, b: Long): Long {
 fun lcm(a: Long, b: Long): Long = a * (b / gcd(a, b))
 
 fun Iterable<Long>.lcm(): Long = reduce { a, b -> lcm(a,b)}
+
+suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
+    map { async { f(it) } }.awaitAll()
+}

@@ -118,9 +118,7 @@ humidity-to-location map:
         val problem = input.parseDay5()
         return problem.seeds.minOf { problem.mapSeed(it) }
     }
-    suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
-        map { async { f(it) } }.awaitAll()
-    }
+
     fun LongRange.chunked(size: Long) = sequence {
         var current = first
         while(current <= last) {
