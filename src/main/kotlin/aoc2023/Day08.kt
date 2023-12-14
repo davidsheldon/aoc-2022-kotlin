@@ -2,10 +2,10 @@ package aoc2023
 
 import utils.InputUtils
 
-enum class Direction{
+private enum class Direction{
     LEFT, RIGHT;
 }
-fun parseDirection(c: Char) = when(c) {
+private fun parseDirection(c: Char) = when(c) {
     'L' -> Direction.LEFT
     'R' -> Direction.RIGHT
     else -> throw IllegalArgumentException("Wrong char $c")
@@ -13,7 +13,7 @@ fun parseDirection(c: Char) = when(c) {
 
 data class Position(val index: Int, val loc: String)
 
-class Day08(val instructions: List<Direction>, val maps: Map<String, Pair<String, String>>) {
+private class Day08(val instructions: List<Direction>, val maps: Map<String, Pair<String, String>>) {
     fun move(current: String, dir: Direction): String =
         when(dir) {
             Direction.LEFT -> maps[current]!!.first
@@ -55,7 +55,7 @@ class Day08(val instructions: List<Direction>, val maps: Map<String, Pair<String
 
 }
 
-fun parseDay08(input: List<String>): Day08 {
+private fun parseDay08(input: List<String>): Day08 {
     val (instructionsList, maps) = blocksOfLines(input).toList()
     val tree = maps.parsedBy("(\\w+) = \\((\\w+), (\\w+)\\)".toRegex()) {
         val (label, left, right) = it.destructured
