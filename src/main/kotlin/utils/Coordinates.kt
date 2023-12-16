@@ -156,5 +156,8 @@ open class ArrayAsSurface(val points: List<String>) {
     open fun at(c: Coordinates): Char = points[c.y][c.x]
     fun checkedAt(c: Coordinates, default: Char = ' ') = if(inBounds(c)) { at(c) } else { default }
 
+    fun getHeight() = points.size
+    fun getWidth() = points[0].length
 
+    override fun toString() = points.joinToString("\n")
 }
