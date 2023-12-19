@@ -101,6 +101,7 @@ fun <T> Sequence<T>.takeWhilePlusOne(predicate: (T) -> Boolean): Sequence<T> {
 
 
 fun Iterable<Int>.product() = reduce(Int::times)
+fun Iterable<Long>.product() = reduce(Long::times)
 
 fun <T> Sequence<Set<T>>.intersectAll() = reduce(Set<T>::intersect)
 fun <T> Sequence<Set<T>>.unionAll() = reduce(Set<T>::union)
@@ -122,3 +123,57 @@ fun Iterable<Long>.lcm(): Long = reduce { a, b -> lcm(a,b)}
 suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
     map { async { f(it) } }.awaitAll()
 }
+
+data class Edge<T>(val start: T, val end: T, val cost: Int)
+
+fun <T> shortestPath(edges: List<Edge<T>>, start: T, end: T): ShortestPathResult<T> {
+    val q = findDistinctNodes(edges)
+    val edgesLeaving = edges.groupBy { it.start }
+    val dist = mutableMapOf(*q.map { it to Int.MAX_VALUE}.toTypedArray())
+    val prev = mutableMapOf<T, T?>(*q.map { it to null}.toTypedArray())
+    fun getDist(x: T) = dist[x] ?: 0
+    dist[start] = 0
+    while(q.isNotEmpty()) {
+        val u = q.minByOrNull { getDist(it) }!!
+        q.remove(u)
+
+        if(u == end) break
+
+        edgesLeaving[u]
+            ?.forEach { edge ->
+                val v = edge.end
+                val alt = getDist(u) + edge.cost
+                if (alt < getDist(v)) {
+                    dist[v] = alt
+                prev[v]=u
+            }
+        }
+    }
+    return ShortestPathResult(prev, dist, start, end)
+}
+
+fun <T> findDistinctNodes(edges: List<Edge<T>>): MutableSet<T> =
+    edges.flatMap { edge -> listOf(edge.start, edge.end) }.toMutableSet()
+
+class ShortestPathResult<T>(val prev: Map<T, T?>, val dist: Map<T, Int>, val source: T, val target: T) {
+
+    fun shortestPath(from: T = source, to: T = target, list: List<T> = emptyList()): List<T> {
+        val last = prev[to] ?: return if (from == to) {
+            list + to
+        } else {
+            emptyList()
+        }
+        return shortestPath(from, last, list) + to
+    }
+
+    fun shortestDistance(): Int? {
+        val shortest = dist[target]
+        if (shortest == Integer.MAX_VALUE) {
+            return null
+        }
+        return shortest
+    }
+}
+
+
+

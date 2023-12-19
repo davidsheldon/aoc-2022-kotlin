@@ -81,13 +81,38 @@ data class Bounds(val tl: Coordinates, val br: Coordinates) {
     operator fun contains(c:Coordinates) = c.x >= tl.x && c.x <= br.x && c.y >= tl.y && c.y <= br.y
 }
 
-sealed class Direction {
+fun List<Coordinates>.bounds() : Bounds {
+    val (tl, br) = this.boundingBox()
+    return Bounds(tl, br)
 }
 
-data object N: Direction()
-data object S: Direction()
-data object E: Direction()
-data object W: Direction()
+sealed class Direction {
+    abstract fun opposite(): Direction
+    abstract fun turnLeft(): Direction
+    abstract fun turnRight(): Direction
+}
+
+data object N: Direction() {
+    override fun opposite() = S
+    override fun turnLeft() = W
+    override fun turnRight() = E
+}
+
+data object S: Direction(){
+    override fun opposite() = N
+    override fun turnLeft() = E
+    override fun turnRight() = W
+}
+data object E: Direction(){
+    override fun opposite() = W
+    override fun turnLeft() = N
+    override fun turnRight() = S
+}
+data object W: Direction(){
+    override fun opposite() = E
+    override fun turnLeft() = S
+    override fun turnRight() = N
+}
 
 
 data class Point3d(val x: Int, val y: Int, val z: Int) {
@@ -159,5 +184,6 @@ open class ArrayAsSurface(val points: List<String>) {
     fun getHeight() = points.size
     fun getWidth() = points[0].length
 
+    fun bottomRight() = bounds.br
     override fun toString() = points.joinToString("\n")
 }
