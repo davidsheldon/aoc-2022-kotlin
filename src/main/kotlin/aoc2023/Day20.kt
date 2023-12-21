@@ -2,11 +2,43 @@ package aoc2023
 
 import utils.InputUtils
 
+enum class SignalLevel{ LOW, HIGH }
+data class Pulse(val signal: SignalLevel, val from: Module, val to:String)
+
+sealed class Module
+
+data class FlipFlop(val outputs: List<String>): Module() {
+
+    var state: Boolean = false
+    fun pulse(p: SignalLevel): List<Pulse> {
+        return when(p) {
+            SignalLevel.HIGH -> { listOf() }
+            SignalLevel.LOW -> {
+                state = !state
+                val signal = if (state) SignalLevel.HIGH else SignalLevel.LOW
+                outputs.map { Pulse(signal, this, it) }
+            }
+        }
+    }
+}
+
+class Conjunction(val inputs: List<String>, val outputs: List<String>): Module(){
+    val states = mapOf<String, SignalLevel>()
+
+    fun pulse(p: SignalLevel): List<Pulse> {
+        TODO("FOO")
+    }
+}
+
+class Broadcaster(val outputs: List<String>): Module()
+
 
 fun main() {
-    val testInput = """
-        
-    """.trimIndent().split("\n")
+    val testInput = """broadcaster -> a
+%a -> inv, con
+&inv -> b
+%b -> con
+&con -> output""".trimIndent().split("\n")
 
 
 
@@ -22,7 +54,7 @@ fun main() {
     // test if implementation meets criteria from the description, like:
     val testValue = part1(testInput)
     println(testValue)
-    check(testValue == -1)
+    check(testValue == 11687500)
 
     println(part2(testInput))
 

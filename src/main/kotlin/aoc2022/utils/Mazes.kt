@@ -22,8 +22,12 @@ fun <T> bfs(
 
 class MazeToTarget<T>(
     val to: T,
-    val neighbours: (T) -> Iterable<T>
+    val neighbours: (T) -> Iterable<T>,
+    private val maxDistance: Int = Int.MAX_VALUE
 ) {
+    constructor(to: T,
+                neighbours: (T) -> Iterable<T>):this(to,neighbours, Int.MAX_VALUE)
+
     val distances = HashMap<T, Int>()
     fun distanceFrom(from: T): Int {
         return routeFrom(from).count()
@@ -46,12 +50,13 @@ class MazeToTarget<T>(
         while (!queue.isEmpty()) {
             val pos = queue.removeFirst()
             val distance = distances[pos]!!
-            neighbours(pos)
-                .filter { it !in distances }
-                .forEach {
-                    queue.addLast(it)
-                    distances[it] = distance + 1
-                }
+            if (distance <= maxDistance)
+                neighbours(pos)
+                    .filter { it !in distances }
+                    .forEach {
+                        queue.addLast(it)
+                        distances[it] = distance + 1
+                    }
         }
     }
 
