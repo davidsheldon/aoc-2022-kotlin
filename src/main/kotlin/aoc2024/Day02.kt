@@ -18,7 +18,7 @@ data class Report(val levels: Array<Int>) {
     }
 
     fun withOneRemoved(): List<Report> {
-        return levels.mapIndexed { index, _ ->
+        return levels.indices.map { index ->
             Report(levels.filterIndexed { i, _ -> i != index }.toTypedArray())
         }
     }
