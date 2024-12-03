@@ -14,7 +14,7 @@ fun <T> bfs(
             if (pos !in seen) {
                 yield(pos)
                 seen.add(pos)
-                neighbours(pos).forEach(queue::addLast)
+                queue.addAll(neighbours(pos))
             }
         }
     }
