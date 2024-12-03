@@ -13,7 +13,7 @@ val pipes = mapOf(
     'F' to setOf(S, E),
 )
 
-class Maze(input: List<String>): ArrayAsSurface(input) {
+private class Maze(input: List<String>): ArrayAsSurface(input) {
     val overrides = mutableMapOf<Coordinates, Char>()
     fun start(): Coordinates = indexed().firstOrNull { it.second == 'S' }?.first ?: throw IllegalStateException("Cant find start")
     fun movesFrom(coord: Coordinates): List<Coordinates> =
