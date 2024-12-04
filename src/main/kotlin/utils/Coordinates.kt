@@ -35,6 +35,18 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
             W -> dX(-distance)
         }
 
+    fun move(d: CompassPoint, distance: Int = 1): Coordinates =
+        when(d) {
+            CompassPoint.N -> dY(-distance)
+            CompassPoint.NE -> move(N).move(E)
+            CompassPoint.NW -> move(N).move(W)
+            CompassPoint.SE -> move(S).move(E)
+            CompassPoint.SW -> move(S).move(W)
+            CompassPoint.S -> dY(distance)
+            CompassPoint.E -> dX(distance)
+            CompassPoint.W -> dX(-distance)
+        }
+
     fun adjacent() = sequence {
             yield(dX(1))
             yield(dX(-1))
@@ -58,6 +70,9 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
 
     fun length(): Int = x.absoluteValue + y.absoluteValue
     fun heading(d: Direction): Sequence<Coordinates> =
+        generateSequence(this) { it.move(d) }
+
+    fun heading(d: CompassPoint): Sequence<Coordinates> =
         generateSequence(this) { it.move(d) }
 
 }
@@ -112,6 +127,10 @@ data object W: Direction(){
     override fun opposite() = E
     override fun turnLeft() = S
     override fun turnRight() = N
+}
+
+enum class CompassPoint {
+    N,NE,E,SE,S,SW,W,NW
 }
 
 
@@ -183,6 +202,7 @@ open class ArrayAsSurface(val points: List<String>) {
 
     fun getHeight() = points.size
     fun getWidth() = points[0].length
+
 
     fun bottomRight() = bounds.br
     override fun toString() = points.joinToString("\n")
