@@ -2,6 +2,8 @@ package utils
 
 import aoc2022.listOfNumbers
 import aoc2022.takeWhilePlusOne
+import aoc2023.replaceAt
+import java.util.function.Predicate
 import kotlin.math.absoluteValue
 import kotlin.math.max
 import kotlin.math.min
@@ -196,6 +198,12 @@ open class ArrayAsSurface(val points: List<String>) {
             row.asSequence().mapIndexed { x: Int, c: Char ->  Coordinates(x,y) to c}
         }
 
+    fun find(test: Predicate<Char>): Coordinates =
+        indexed()
+            .first { (_, c) -> test.test(c)}
+            .first
+
+
     fun inBounds(c: Coordinates) = bounds.contains(c)
     open fun at(c: Coordinates): Char = points[c.y][c.x]
     fun checkedAt(c: Coordinates, default: Char = ' ') = if(inBounds(c)) { at(c) } else { default }
@@ -206,4 +214,7 @@ open class ArrayAsSurface(val points: List<String>) {
 
     fun bottomRight() = bounds.br
     override fun toString() = points.joinToString("\n")
+    fun replace(c: Coordinates, char: Char) = ArrayAsSurface(
+        points.mapIndexed { y, line -> if (y==c.y) line.replaceAt(c.x,char) else line }
+    )
 }

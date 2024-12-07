@@ -3,9 +3,6 @@ package aoc2024
 import utils.*
 
 class WordSearch(val grid: List<String>):ArrayAsSurface(grid) {
-    fun each(): Sequence<Pair<Char, Coordinates>> =
-        allPoints().map { it -> at(it) to it }
-
     fun charsFrom(start: Coordinates, direction: CompassPoint, n: Int = 4): String =
         start.heading(direction).takeWhile { coordinates -> inBounds(coordinates) }.take(n).map { at(it) }.joinToString("")
 
@@ -28,8 +25,8 @@ MXMXAXMASX""".trimIndent().split("\n")
 
     fun part1(input: List<String>): Long {
         val wordSearch = WordSearch(input)
-        return wordSearch.each().filter { (c, _) -> c == 'X' }
-            .sumOf { (_, coord) ->
+        return wordSearch.indexed().filter { (_, c) -> c == 'X' }
+            .sumOf { (coord, _) ->
                 CompassPoint.entries
                   //  .onEach { println (" $it - ${wordSearch.charsFrom(coord, it)}")  }
                     .map { wordSearch.charsFrom(coord, it) }
@@ -42,10 +39,10 @@ MXMXAXMASX""".trimIndent().split("\n")
         val wordSearch = WordSearch(input)
         val possibleWords = listOf("MAS", "SAM")
         val possibleBox = Bounds(Coordinates(1,1), wordSearch.bottomRight().dX(-1).dY(-1))
-        return wordSearch.each()
-            .filter { (c, _) -> c == 'A' }
-            .filter { (_, coord) ->  possibleBox.contains(coord) }
-            .filter { (_, coord) ->
+        return wordSearch.indexed()
+            .filter { (_, c) -> c == 'A' }
+            .filter { (coord, _) ->  possibleBox.contains(coord) }
+            .filter { (coord, _) ->
                 var word1 = wordSearch.charsFrom(coord.move(CompassPoint.NW), CompassPoint.SE, 3)
                 var word2 = wordSearch.charsFrom(coord.move(CompassPoint.SW), CompassPoint.NE, 3)
                 possibleWords.containsAll(listOf(word1, word2))
