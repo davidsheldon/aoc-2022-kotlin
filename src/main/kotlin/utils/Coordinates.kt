@@ -3,6 +3,7 @@ package utils
 import aoc2022.listOfNumbers
 import aoc2022.takeWhilePlusOne
 import aoc2023.replaceAt
+import org.apache.commons.math3.util.ArithmeticUtils.gcd
 import java.util.function.Predicate
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -19,6 +20,10 @@ data class Coordinates(val x: Int = 0, val y : Int = 0) {
     operator fun minus(other: Coordinates) = Coordinates(x - other.x, y - other.y)
     operator fun plus(other: Coordinates) = Coordinates(x + other.x, y + other.y)
     fun sign() = Coordinates(x.sign, y.sign)
+    fun normalise(): Coordinates {
+        val divisor = gcd(x, y)
+        return Coordinates(x/divisor, y/divisor)
+    }
 
     fun directionTo(other: Coordinates) = Coordinates(other.x - x, other.y - y).sign()
     fun compassTo(other: Coordinates) = when(directionTo(other)) {
