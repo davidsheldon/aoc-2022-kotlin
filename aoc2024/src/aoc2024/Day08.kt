@@ -1,6 +1,5 @@
 package aoc2024
 
-import aoc2023.allPairs
 import utils.ArrayAsSurface
 import utils.Coordinates
 import utils.InputUtils
@@ -59,9 +58,9 @@ fun main() {
                 .filter { it.first != it.second }
                 .flatMap { (a,b) ->
                     val diff = a.minus(b).normalise()
-                    generateSequence(a) { it.plus(diff)}
+                    generateSequence(a) { it.plus(diff) }
                         .takeWhile { coordinates -> city.inBounds(coordinates) } +
-                    generateSequence(a) { it.minus(diff)}
+                    generateSequence(a) { it.minus(diff) }
                         .takeWhile { coordinates -> city.inBounds(coordinates) }
                 }.toList()
             ret

@@ -1,11 +1,28 @@
 package aoc2024
 
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import utils.Coordinates
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
+
+fun <T> bfs(
+    start: T,
+    neighbours: (T) -> Sequence<T>
+): Sequence<T> {
+    val queue = ArrayDeque<T>()
+    val seen = mutableSetOf<T>()
+    queue.add(start)
+    return sequence {
+        while (!queue.isEmpty()) {
+            val pos = queue.removeFirst()
+            if (pos !in seen) {
+                yield(pos)
+                seen.add(pos)
+                queue.addAll(neighbours(pos))
+            }
+        }
+    }
+}
 
 /**
  * Reads lines from the given input txt file.
@@ -120,9 +137,6 @@ fun lcm(a: Long, b: Long): Long = a * (b / gcd(a, b))
 
 fun Iterable<Long>.lcm(): Long = reduce { a, b -> lcm(a,b)}
 
-suspend fun <A, B> Iterable<A>.pmap(f: suspend (A) -> B): List<B> = coroutineScope {
-    map { async { f(it) } }.awaitAll()
-}
 
 data class Edge<T>(val start: T, val end: T, val cost: Int)
 
@@ -177,3 +191,10 @@ class ShortestPathResult<T>(val prev: Map<T, T?>, val dist: Map<T, Int>, val sou
 
 
 
+fun Coordinates.distanceTo(other: Coordinates) = (other - this).length()
+
+fun <T> allPairs(items: List<T>): Sequence<Pair<T,T>> = items.asSequence().flatMapIndexed { a, first ->
+    (a..<items.size).mapNotNull { b -> items[b].let { first to it } }
+}
+
+fun String.listOfLongs(): List<Long> = trim().split("\\D+".toRegex()).map { it.trim().toLong() }

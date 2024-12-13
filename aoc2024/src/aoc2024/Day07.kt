@@ -1,6 +1,5 @@
 package aoc2024
 
-import aoc2023.listOfLongs
 import utils.InputUtils
 
 private fun part1Solved(target: Long, nums: List<Long>): Boolean {
