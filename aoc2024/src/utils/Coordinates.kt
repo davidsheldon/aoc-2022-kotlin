@@ -88,6 +88,8 @@ data class Coordinates(val x: Int = 0, val y : Int = 0): Comparable<Coordinates>
     fun heading(d: CompassPoint): Sequence<Coordinates> =
         generateSequence(this) { it.move(d) }
 
+    fun crossProduct(other: Coordinates) = x*other.y - y*other.x
+
     override fun compareTo(other: Coordinates): Int = compareBy(Coordinates::y, Coordinates::x).compare(this, other)
 
 }
