@@ -23,12 +23,7 @@ fun ways(blockSize: Int, maxSize: Int): List<String> = (blockSize..maxSize).flat
 
 data class Key(val pattern: String, val x: Int)
 
-fun w2(pattern: String, groups: List<Int>, cache: MutableMap<Key, Int>): Int = cache.getOrPut(Key(pattern, groups.size)) {
-    val ret = ways2(pattern, groups, cache)
-   // println("'$pattern' ($groups) = $ret")
-    return ret
-}
-fun ways2(pattern: String, groups: List<Int>, cache: MutableMap<Key, Int>): Int {
+fun ways2(pattern: String, groups: List<Int>, cache: MutableMap<Key, Long>): Long {
     if (groups.isEmpty()) {
         return if (pattern.contains('#')) { 0 } else { 1 }
     }
@@ -36,8 +31,14 @@ fun ways2(pattern: String, groups: List<Int>, cache: MutableMap<Key, Int>): Int 
         return 0
     }
     if (pattern.length < minSize(groups) - 1) return 0
+
+    val key = Key(pattern, groups.size)
+    if (cache.containsKey(key)) {
+        return cache[key]!!
+    }
+
     val first = pattern.first()
-    fun hash(): Int {
+    fun hash(): Long {
         val firstGroup = groups.first()
         val prefix = pattern.take(firstGroup)
         if (prefix.length != firstGroup || prefix.contains('.')) return 0  // Can't fit the first group
@@ -46,16 +47,18 @@ fun ways2(pattern: String, groups: List<Int>, cache: MutableMap<Key, Int>): Int 
             return 1
         }
         if (pattern[firstGroup] == '#') return 0
-        return w2(pattern.drop(firstGroup+1), groups.drop(1), cache)
+        return ways2(pattern.drop(firstGroup+1), groups.drop(1), cache)
     }
 
-    return when(first) {
-        '.' -> w2(pattern.drop(1), groups, cache)
+    val ret = when(first) {
+        '.' -> ways2(pattern.drop(1), groups, cache)
         '#' -> hash()
         else -> {
-            w2(pattern.drop(1), groups, cache) + hash()
+            ways2(pattern.drop(1), groups, cache) + hash()
         }// ?
     }
+    cache[key] = ret
+    return ret
 }
 
 fun allWays(pattern: String, groups: List<Int>) = ways2(pattern, groups, mutableMapOf())
@@ -120,41 +123,6 @@ fun main() {
 
     println(allWays(".??..??..", listOf(1,1)))
     println(allWays(".??..###", listOf(1,3)))
-    fun groups(arrangement: String) = arrangement.split(dots).map { it.length }.filter { it != 0 }
-
-    fun impossible(arrangement: String, expected: List<Int>): Boolean {
-        val actual = groups(arrangement)
-        if (actual.isEmpty()) return false
-        if (actual.size > expected.size) return true
-        if ((0..<actual.size-1).any { actual[it] != expected[it] }) return true
-        if (actual.last() > expected[actual.size - 1]) return true
-        return false
-    }
-
-    fun matches(arrangement: String, expected: List<Int>): Boolean {
-        matchCount++
-        val actual = groups(arrangement)
-        return actual == expected
-
-    }
-
-
-
-    fun validCombinations(pattern: String, maxLength: Int, groups: List<Int>) {
-        //
-    }
-
-    fun combination(pattern: String, groups: List<Int>): Int {
-        val firstQ = pattern.indexOf('?')
-        if (firstQ == -1) {
-            return if (matches(pattern, groups))
-                1
-            else 0
-        }
-        if (impossible(pattern.substring(0, firstQ), groups)) { return 0 }
-        return combination(pattern.replaceAt(firstQ, '.'), groups) +
-                combination(pattern.replaceAt(firstQ, '#'), groups)
-    }
 
     fun getProblem(input: List<String>) = input.map {
         val (pattern, groupString) = it.split(" ")
@@ -164,7 +132,7 @@ fun main() {
 
     println(solutionsMatching(listOf(1,1,3), ".??..??...?##."))
 
-    fun part1(input: List<String>): Int {
+    fun part1(input: List<String>): Long {
         val problem = getProblem(input)
         return problem
             .asSequence()
@@ -178,7 +146,7 @@ fun main() {
     fun String.repeatJoined(n: Int, joiner: CharSequence) = Array(n) { this}.joinToString(joiner)
     fun <T> List<T>.repeated(n: Int) = List(n) { this}.flatten()
 
-    fun part2(input: List<String>): Int {
+    fun part2(input: List<String>): Long {
         val problem = getProblem(input)
 
         return problem.asSequence()
@@ -193,7 +161,7 @@ fun main() {
     // test if implementation meets criteria from the description, like:
     val testValue = part1(testInput)
     println(testValue)
-    check(testValue == 21)
+    check(testValue == 21L)
 
     println(part2(testInput))
 
