@@ -213,6 +213,7 @@ open class ArrayAsSurface(val points: List<String>) {
             row.asSequence().mapIndexed { x: Int, c: Char ->  Coordinates(x,y) to c}
         }
 
+    fun find(c: Char) = find { it == c}
     fun find(test: Predicate<Char>): Coordinates =
         indexed()
             .first { (_, c) -> test.test(c)}
