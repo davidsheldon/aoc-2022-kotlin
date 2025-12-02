@@ -2,7 +2,6 @@ package utils
 
 import aoc2024.listOfNumbers
 import aoc2024.takeWhilePlusOne
-import org.apache.commons.math3.util.ArithmeticUtils.gcd
 import java.util.function.Predicate
 import kotlin.math.absoluteValue
 import kotlin.math.max
@@ -15,6 +14,16 @@ fun String.replaceAt(index: Int, c: Char): String {
     return sb.toString()
 }
 
+fun gcd(a: Int, b: Int): Int {
+    var num1 = a
+    var num2 = b
+    while (num2 != 0) {
+        val temp = num2
+        num2 = num1 % num2
+        num1 = temp
+    }
+    return num1
+}
 
 data class Coordinates(val x: Int = 0, val y : Int = 0): Comparable<Coordinates> {
     fun dY(delta : Int) = copy(y = y + delta)
@@ -222,6 +231,8 @@ open class ArrayAsSurface(val points: List<String>) {
 
     fun inBounds(c: Coordinates) = bounds.contains(c)
     open fun at(c: Coordinates): Char = points[c.y][c.x]
+    fun get(x: Int, y: Int) = points[y][x]
+    fun get(c: Coordinates) = at(c)
     fun checkedAt(c: Coordinates, default: Char = ' ') = if(inBounds(c)) { at(c) } else { default }
 
     fun getHeight() = points.size

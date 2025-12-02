@@ -34,7 +34,7 @@ fun main() {
         val transmitters = city.getTransmitters()
 
         return transmitters.flatMap { (_,locs) ->
-            val ret = allPairs(locs)
+            val ret = locs.allPairs()
                 .filter { it.first != it.second }
                 .flatMap { (a,b) ->
                 val diff = a.minus(b)
@@ -54,7 +54,7 @@ fun main() {
         val transmitters = city.getTransmitters()
 
         return transmitters.flatMap { (c,locs) ->
-            val ret = allPairs(locs)
+            val ret = locs.allPairs()
                 .filter { it.first != it.second }
                 .flatMap { (a,b) ->
                     val diff = a.minus(b).normalise()

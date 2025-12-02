@@ -4,6 +4,7 @@ import utils.Coordinates
 import java.io.File
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.util.Collections.swap
 
 fun <T> bfs(
     start: T,
@@ -138,7 +139,9 @@ fun lcm(a: Long, b: Long): Long = a * (b / gcd(a, b))
 fun Iterable<Long>.lcm(): Long = reduce { a, b -> lcm(a,b)}
 
 
-data class Edge<T>(val start: T, val end: T, val cost: Int)
+data class Edge<T>(val start: T, val end: T, val cost: Int) {
+    fun reversed() = copy(start=end, end=start)
+}
 
 fun <T> shortestPath(edges: List<Edge<T>>, start: T, end: T): ShortestPathResult<T> {
     val q = findDistinctNodes(edges)
@@ -189,12 +192,120 @@ class ShortestPathResult<T>(val prev: Map<T, T?>, val dist: Map<T, Int>, val sou
     }
 }
 
+fun <V> List<V>.permutations(): List<List<V>> {
+    val retVal: MutableList<List<V>> = mutableListOf()
+
+    fun generate(k: Int, list: List<V>) {
+        // If only 1 element, just output the array
+        if (k == 1) {
+            retVal.add(list.toList())
+        } else {
+            for (i in 0 until k) {
+                generate(k - 1, list)
+                if (k % 2 == 0) {
+                    swap(list, i, k - 1)
+                } else {
+                    swap(list, 0, k - 1)
+                }
+            }
+        }
+    }
+
+    generate(this.count(), this.toList())
+    return retVal
+}
 
 
 fun Coordinates.distanceTo(other: Coordinates) = (other - this).length()
 
-fun <T> allPairs(items: List<T>): Sequence<Pair<T,T>> = items.asSequence().flatMapIndexed { a, first ->
-    (a..<items.size).mapNotNull { b -> items[b].let { first to it } }
+fun <T> List<T>.allPairs(): Sequence<Pair<T,T>> = asSequence().flatMapIndexed { a, first ->
+    (a..<size).mapNotNull { b -> get(b).let { first to it } }
 }
 
+
 fun String.listOfLongs(): List<Long> = trim().split("\\D+".toRegex()).map { it.trim().toLong() }
+
+typealias Matrix=Array<IntArray>
+
+fun multiplyMatrices(matrix1: Matrix, matrix2: Matrix): Matrix {
+    val row1 = matrix1.size
+    val col1 = matrix1[0].size
+    val col2 = matrix2[0].size
+    val product = Array(row1) { IntArray(col2) }
+
+    for (i in 0 until row1) {
+        for (j in 0 until col2) {
+            for (k in 0 until col1) {
+                product[i][j] += matrix1[i][k] * matrix2[k][j]
+            }
+        }
+    }
+
+    return product
+}
+fun matrixPower(matrix1: Matrix, n:Int) = (1..<n).fold(matrix1) { acc, _ -> multiplyMatrices(acc, matrix1) }
+fun Matrix.trace() = (0..<size).sumOf { get(it)[it] }
+
+class DisjointSets<T> {
+    val parents = mutableMapOf<T,T>()
+    fun add(item:T) {
+        parents.putIfAbsent(item, item)
+    }
+    fun root(a:T):T {
+        val y = parents[a]!!
+        if (y==a) { return a }
+        val ret = root(y)
+        parents[a] = ret
+        return ret
+    }
+    fun merge(a:T, b: T) {
+        val aRoot = root(a)
+        val bRoot = root(b)
+        if (aRoot == bRoot) { return }
+        parents[aRoot] = bRoot
+    }
+}
+
+fun List<List<String>>.combinations(): List<String> {
+    if (isEmpty()) return emptyList()
+    if (size == 1) return first()
+
+    val tail = drop(1).combinations()
+    return first().flatMap { h ->
+        tail.map { t -> h + t }
+    }
+}
+
+
+// Clique finding - https://en.wikipedia.org/wiki/Bron%E2%80%93Kerbosch_algorithm
+class BronKerbosch<T>(private val neighbours: Map<T, Set<T>>) {
+
+    private var bestR: Set<T> = emptySet()
+
+    fun largestClique(): Set<T> {
+        execute(neighbours.keys)
+        return bestR
+    }
+
+    private fun execute(
+        p: Set<T>,
+        r: Set<T> = emptySet(),
+        x: Set<T> = emptySet()
+    ) {
+        if (p.isEmpty() && x.isEmpty()) {
+            // We have found a potential best R value, compare it to the best so far.
+            if (r.size > bestR.size) bestR = r
+        } else {
+            val mostNeighboursOfPandX: T = (p + x).maxBy { neighbours[it]!!.size }!!
+            val pWithoutNeighbours = p.minus(neighbours[mostNeighboursOfPandX]!!)
+            pWithoutNeighbours.forEach { v ->
+                val nV = neighbours[v]!!
+                execute(
+                    p.intersect(nV),
+                    r + v,
+                    x.intersect(nV)
+                )
+            }
+        }
+    }
+}
