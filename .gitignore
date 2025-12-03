@@ -3,3 +3,4 @@
 build
 src/**/*.txt
 /src/main/resources/secret.properties
+/aoc2024/resources/secret.properties
