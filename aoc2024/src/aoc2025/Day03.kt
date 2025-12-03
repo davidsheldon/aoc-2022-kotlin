@@ -1,6 +1,7 @@
 package aoc2025
 
 import utils.InputUtils
+import kotlin.time.measureTime
 
 fun main() {
         val testInput = """
@@ -28,8 +29,9 @@ fun main() {
     val puzzleInput = InputUtils.downloadAndGetLines(2025, 3)
     val input = puzzleInput.toList()
 
-    println(part1(input))
-    println(part2(input))
+    println(measureTime { println(part1(input)) })
+    println(measureTime { println(part2(input)) })
+    //175304218462560
 }
 
 fun joltage(bank: String): Int {
@@ -39,22 +41,12 @@ fun joltage(bank: String): Int {
     return "$first$last".toInt()
 }
 
-val cache = mutableMapOf<Pair<String, Int>, String>()
-
 fun bigJoltage(bank: String, digits: Int): String {
-    if (digits < 1) return ""
-    if (bank.length < digits) return ""
-    if (bank.length == digits) return bank
-    val key = bank to digits
-    if (cache.containsKey(key)) return cache[key]!!
+    if (digits == 2) return joltage(bank).toString()
+    val first = bank.dropLast(digits-1).max()
+    val firstPos = bank.indexOf(first)
+    val last = bank.substring(firstPos + 1)
 
-    val ret = if (digits == 1) {
-       bank.max().toString()
-    } else bank.mapIndexed { index, c ->
-        val remaining = bigJoltage(bank.drop(index + 1 ), digits - 1)
-        "$c$remaining"
-    }.maxBy { it.toLong() }
-    cache[key] = ret
-    return ret
+    return "$first${bigJoltage(last, digits - 1)}"
 }
 
