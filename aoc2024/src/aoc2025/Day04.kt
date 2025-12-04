@@ -29,19 +29,38 @@ fun main() {
 
     }
 
+    fun removeEntry(
+        key: Coordinates,
+        adjacent: MutableMap<Coordinates, MutableSet<Coordinates>>,
+    ) {
+        val adjacency = adjacent.remove(key) ?: return
+        adjacency.forEach { k ->
+            val entry = adjacent[k]
+            if (entry != null) {
+                entry.remove(key)
+                if (entry.size < 4) {
+                    removeEntry(k, adjacent)
+                }
+            }
+        }
+        return
+    }
 
     fun part2(input: List<String>): Long {
         val map = ArrayAsSurface(input)
-        val rolls = map.findAll { it == '@' } .toMutableSet()
-        var countRemoved = 0L
-        do {
-            val toRemove = rolls.filter { c -> c.adjacentIncludeDiagonal().count { rolls.contains(it)} < 4 }
+        val rolls = map.findAll { it == '@' }.toSet()
+        val adjacent =
+            rolls.associateWith { it.adjacentIncludeDiagonal().filter { c -> rolls.contains(c) }.toMutableSet() }.toMutableMap()
 
-            //println("Removing ${toRemove.size}")
-            countRemoved += toRemove.size
-            rolls.removeAll(toRemove)
-        } while (toRemove.isNotEmpty())
-        return countRemoved
+        do {
+            val toRemove = adjacent.entries.firstOrNull { (_, v) -> v.size < 4 }
+            if (toRemove == null) break;
+
+            removeEntry(toRemove.key, adjacent)
+//            println("Removed ${toRemove.key}, ${adjacent.size} remaining")
+        } while (true)
+        return rolls.size - adjacent.size.toLong()
+
     }
 
     // test if implementation meets criteria from the description, like:

@@ -41,10 +41,10 @@ fun main() {
 
 
     fun runIt(input: String, filter: Predicate<String>): Long {
-        val inputs: List<String> = input.split(",").flatMap {
+        val inputs: Sequence<String> = input.split(",").asSequence().flatMap {
             val range = it.toLongRange()
 
-            range.map { it.toString() }
+            range.asSequence().map { it.toString() }
         }
         return inputs.filter { filter.test(it) }.sumOf { it.toLong() }
     }
@@ -105,8 +105,7 @@ fun main() {
 
     fun runLongSum(input: String, sumFunction: (LongRange) -> Long): Long {
         val inputs: List<Long> = input.split(",").map {
-            val r = it.split("-").map(String::toLong)
-            sumFunction(r[0]..r[1])
+            sumFunction(it.toLongRange())
         }
         return inputs.sum()
     }
