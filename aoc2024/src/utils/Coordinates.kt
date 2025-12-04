@@ -227,6 +227,10 @@ open class ArrayAsSurface(val points: List<String>) {
         indexed()
             .first { (_, c) -> test.test(c)}
             .first
+    fun findAll(test: Predicate<Char>): Sequence<Coordinates> =
+        indexed()
+            .filter { (_, c) -> test.test(c)}
+            .map { it.first }
 
 
     fun inBounds(c: Coordinates) = bounds.contains(c)
