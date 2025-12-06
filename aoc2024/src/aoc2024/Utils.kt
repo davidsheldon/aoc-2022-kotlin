@@ -118,6 +118,13 @@ fun <T> Sequence<T>.takeWhilePlusOne(predicate: (T) -> Boolean): Sequence<T> {
 }
 
 
+
+fun LongRange.size(): Long = last - first + 1
+infix fun LongRange.covers(second: LongRange) = first <= second.first && last >= second.last
+infix fun LongRange.intersects(second: LongRange) =
+    second.first in this || second.last in this || this.first in second
+
+
 fun Iterable<Int>.product() = reduce(Int::times)
 fun Iterable<Long>.product() = reduce(Long::times)
 

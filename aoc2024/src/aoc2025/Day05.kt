@@ -1,5 +1,8 @@
 package aoc2025
 
+import aoc2024.covers
+import aoc2024.intersects
+import aoc2024.size
 import aoc2024.toBlocksOfLines
 import utils.InputUtils
 import kotlin.time.measureTime
@@ -27,11 +30,6 @@ fun main() {
         return ingredients.map { it.toLong() }.count { i -> fresh.any { r -> r.contains(i) } }.toLong()
 
     }
-
-    fun LongRange.size(): Long = last - first + 1
-    infix fun LongRange.covers(second: LongRange) = first <= second.first && last >= second.last
-    infix fun LongRange.intersects(second: LongRange) =
-        second.first in this || second.last in this || this.first in second
 
 
     fun part2(input: List<String>): Long {
