@@ -258,6 +258,9 @@ class DisjointSets<T> {
     fun add(item:T) {
         parents.putIfAbsent(item, item)
     }
+    fun addAll(all: Collection<T>) {
+        all.forEach { add(it) }
+    }
     fun root(a:T):T {
         val y = parents[a]!!
         if (y==a) { return a }
@@ -265,12 +268,17 @@ class DisjointSets<T> {
         parents[a] = ret
         return ret
     }
-    fun merge(a:T, b: T) {
+    fun merge(a:T, b: T): Boolean {
         val aRoot = root(a)
         val bRoot = root(b)
-        if (aRoot == bRoot) { return }
+        if (aRoot == bRoot) { return false}
         parents[aRoot] = bRoot
+        return true
     }
+
+    fun toSets(): Set<Set<T>> =
+        parents.keys.groupBy { root(it) }.values.map {it.toSet() }.toSet()
+
 }
 
 fun List<List<String>>.combinations(): List<String> {
