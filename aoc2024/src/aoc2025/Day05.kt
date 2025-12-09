@@ -7,6 +7,28 @@ import aoc2024.toBlocksOfLines
 import utils.InputUtils
 import kotlin.time.measureTime
 
+fun Sequence<LongRange>.simplify(): Sequence<LongRange> {
+    val byStart = this.sortedBy { it.first }
+
+    val i = byStart.iterator()
+    var current = i.next()
+    return sequence {
+        while (i.hasNext()) {
+            val next = i.next()
+            if (current covers next) {
+                continue
+            }
+            if (current intersects next) {
+                current = current.first..next.last
+            } else {
+                yield (current)
+                current = next
+            }
+        }
+        yield (current)
+    }
+}
+
 fun main() {
         val testInput = """
 3-5
@@ -35,26 +57,7 @@ fun main() {
     fun part2(input: List<String>): Long {
         val fresh = input.toBlocksOfLines().first().map { it.toLongRange() }
 
-        val byStart = fresh.sortedBy { it.first }
-
-        val i = byStart.iterator()
-        var current = i.next()
-        var countFresh = current.size()
-
-        while(i.hasNext()) {
-            val next = i.next()
-            if (current covers next) { continue}
-            if (current intersects next) {
-                countFresh += next.last - current.last
-                current = current.first .. next.last
-            }
-            else {
-                countFresh += next.size()
-                current = next
-            }
-        }
-
-        return countFresh
+        return fresh.asSequence().simplify().sumOf { it.size()}
     }
 
     // test if implementation meets criteria from the description, like:
