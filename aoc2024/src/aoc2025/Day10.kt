@@ -102,6 +102,7 @@ data class LightPuzzle(
         if (sws.size == 1) {
             val sw = sws.first()
             val newJolts = jolts.mapIndexed { i, j -> if (i in sw) {j - presses } else {j } }
+            if (newJolts.any { it < 0 }) return null
             return fewestPresses(switches.minusElement(sw), newJolts)?.plus(presses)
         }
         else {
@@ -149,41 +150,9 @@ data class LightPuzzle(
         // Solve!
 
         return fewestPresses(
-            wirings.map { it.toSet() }.toSet(), joltages.toList())!!
-//
-//        val jolts = joltages.toMutableList()
-//        val switches = wirings
-//        val switchCounts = mutableMapOf<Int, Int>()
-//        var influencesForEach: Map<Int, List<Int>>
-//        do {
-//            influencesForEach = jolts.indices.associateWith { // JoltIndex to SwitchIndex
-//                switches.indices.filter { i -> !switchCounts.contains(i) && switches[i].contains(it) }
-//            }
-//            val singles = influencesForEach.filter { it.value.size == 1 }
-//            if (singles.isEmpty()) {
-//                break;
-//            }
-//            //println("Singles $singles counts: $switchCounts jolts: $jolts")
-//            singles.forEach {
-//                val switch = it.value.first()
-//                if (! switchCounts.contains(switch)) {
-//                    val count = jolts[it.key]
-//                    switchCounts[switch] = count
-//                    switches[switch].forEach { i -> jolts[i] -= count }
-//                }
-//            }
-//        } while (true)
-//
-//        // So now we have an updated jolts to be returned from all the switches with 0 in switchCounts
-//        // and an array of influences of each
-//
-//        println("Switches: ${switches.indices.filter { i -> !switchCounts.contains(i) }} Max jolt: ${jolts.max()} " )
-//
-//       // println(switchCounts)
-//
-//        return switchCounts.values.sum()
+            wirings.map { it.toSet() }.toSet(), joltages.toList()
+        )!!
     }
-
     fun minSwitchesForJoltageBruteForce(): Int {
         // OOMs after 5 mins
         val initial = joltages.map { 0 }

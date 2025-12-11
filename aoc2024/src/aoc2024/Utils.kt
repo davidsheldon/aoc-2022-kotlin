@@ -234,6 +234,17 @@ fun String.listOfLongs(): List<Long> = trim().split("\\D+".toRegex()).map { it.t
 
 typealias Matrix=Array<IntArray>
 
+fun Matrix.rotate(): Matrix {
+    val w = get(0).size
+    val rotated = Array(w) { IntArray(size) }
+    for(i in 0 until size) {
+        for(j in 0 until w) {
+            rotated[j][i] = this[i][j]
+        }
+    }
+    return rotated
+}
+
 fun multiplyMatrices(matrix1: Matrix, matrix2: Matrix): Matrix {
     val row1 = matrix1.size
     val col1 = matrix1[0].size
