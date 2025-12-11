@@ -5,6 +5,9 @@ import aoc2024.parsedBy
 import utils.InputUtils
 import java.util.*
 import kotlin.time.measureTime
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+
 
 val wiringRegex = "\\(([^)]*)\\)".toRegex()
 val puzzleRegex = "\\[(.*)] (($wiringRegex ?)+) \\{([\\d,]+)}".toRegex()
@@ -211,10 +214,26 @@ fun main() {
     fun part2(input: List<String>): Long {
         val puzzles = input.map { it.toPuzzle() }
         //println(puzzles)
-        var count = 0
-        return puzzles.asSequence().map { it.minSwitchesForJoltagesLinearAlg().toLong() }
-            .onEach { println("Count $it (${++count}/${input.size})") }
-            .sum()
+        var total = 0L
+        runBlocking {
+            val channel = Channel<Long>()
+            puzzles.mapIndexed { index, puzzle ->
+                launch(Dispatchers.Default) {
+                    channel.send(puzzle.minSwitchesForJoltagesLinearAlg().toLong())
+                }
+            }
+            var count = 0
+            repeat(puzzles.size) {
+                total += channel.receive()
+                println("Finished ${++count}/${puzzles.size}")
+
+            }
+
+        }
+        return total
+//        return puzzles.asSequence().map { it.minSwitchesForJoltagesLinearAlg().toLong() }
+//            .onEach { println("Count $it (${++count}/${input.size})") }
+//            .sum()
     }
 
     // test if implementation meets criteria from the description, like:
