@@ -2,11 +2,13 @@ package aoc2025
 
 import aoc2024.listOfNumbers
 import aoc2024.parsedBy
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import utils.InputUtils
 import java.util.*
 import kotlin.time.measureTime
-import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 
 
 val wiringRegex = "\\(([^)]*)\\)".toRegex()
@@ -26,11 +28,10 @@ data class LightPuzzle(
     var targetBits: Long =
         target.mapIndexed { index, bit ->
             if (bit=='#') { 1L shl index } else {0L}
-        }
-            .sum()
+        }.reduce { acc, l -> acc.or(l) }
 
     val wiringsBits = wirings.map {
-        it.sumOf { idx -> 1L shl idx }
+        it.map { idx -> 1L shl idx }.reduce { acc, l -> acc.or(l) }
     }
 
 
@@ -38,22 +39,23 @@ data class LightPuzzle(
 
 
     fun minSwitchesForBits(): Int {
-        if (targetBits == 0L) { return 0 }
-
-        var currentSet = setOf(0L)
-        var currentCount = 0
-        val cache = mutableMapOf(0L to 0)
-
-        while(!cache.contains(targetBits)) {
-            currentCount++
-            currentSet = currentSet.flatMap { bitSet ->
-                wiringsBits.map { w -> w.xor(bitSet) } }
-                .filter { cache.putIfAbsent(it, currentCount) == null }
-                .toSet()
-        }
-
-        return cache[targetBits] ?: -1
+        return allSwitchesForBits(targetBits).minOf { it.countOneBits() }
     }
+
+    fun allSwitchesForBits(targetLights: Long = targetBits): Sequence<Int> {
+        return sequence {
+            (0..<(1 shl wiringsBits.size)).forEach { bits ->
+                // Each bit represents one of the wiringBits masks to be applied. We need to xor all of them
+                // to get the result
+                val lights = wiringsBits.mapIndexed { index, mask -> if ((1 shl index).and( bits) > 0 ) mask else 0  }
+                    .fold(0L) { a,b -> a.xor(b) }
+                if (lights == targetLights) {
+                    yield (bits)
+                }
+            }
+        }
+    }
+
 
     fun addCounts(jolts: List<Int>, indiciesToIncrement: List<Int>): List<Int> {
         return jolts.mapIndexed { i, j ->
@@ -136,6 +138,45 @@ data class LightPuzzle(
 
     }
 
+    fun subtractSwitch(switchIndex: Int, jolts: List<Int>): List<Int> =
+        jolts.mapIndexed { i, j -> if (i in wirings[switchIndex]) j - 1 else j }
+
+    fun List<Int>.div2() = map { it / 2 }
+
+    fun bifurcate(joltages: List<Int>, cache: MutableMap<List<Int>, Int> = mutableMapOf()): Int {
+        if (joltages in cache) return cache[joltages]!!
+        if (joltages.all { it == 0}) {
+            cache[joltages] = 0
+            return 0
+        }
+        val odds = joltages.indices.filter { joltages[it] % 2 == 1 }
+        val oddsBits = odds.map { 1L shl it }.fold(0L) { acc, l -> acc.or(l) }
+//        if (oddsBits == 0L) {
+//            val ret = 2 * bifurcate(joltages.div2(), cache)
+//            cache[joltages] = ret
+//            return ret
+//        }
+//
+
+        // Find the pattern of switches that make the resulting joltage even
+        val allSwitches = allSwitchesForBits(oddsBits).toList()
+
+        if (allSwitches.isEmpty()) return 100000
+
+        val ret = allSwitches.minOf { sw ->
+            val newJoltages = wirings.indices
+                .filter { (1 shl it).and(sw) > 0  }
+                .fold(joltages) { acc, idx -> subtractSwitch(idx, acc) }
+            if (newJoltages.any { it < 0 }) return@minOf 100000
+            // Divide all the joltages by two
+            // Recurse
+            sw.countOneBits() + (2* bifurcate(newJoltages.div2(), cache))
+        }
+        cache[joltages] = ret
+        return ret
+    }
+
+
     fun minSwitchesForJoltagesLinearAlg(): Int {
         // Convert to matrix
         // For each switch, i, it will be pressed a_i times.
@@ -216,10 +257,10 @@ fun main() {
         //println(puzzles)
         var total = 0L
         runBlocking {
-            val channel = Channel<Long>()
+            val channel = Channel<Long>(5)
             puzzles.mapIndexed { index, puzzle ->
-                launch(Dispatchers.Default) {
-                    channel.send(puzzle.minSwitchesForJoltagesLinearAlg().toLong())
+               launch(Dispatchers.Default) {
+                   channel.send(puzzle.bifurcate(puzzle.joltages).toLong())
                 }
             }
             var count = 0
